@@ -87,7 +87,8 @@ export function ChatWindow({ scenario, onFinish, onBack }: ChatWindowProps) {
   }, [messages, interventions]);
 
   const send = (message: string, forcedSpeaker?: string) => {
-    if (!message.trim()) return;
+    if (!message.trim() || listening) return;
+    setListening(true);
     socket?.emit('human-message', {
       sessionId: session.current,
       speaker: forcedSpeaker || speaker,
@@ -97,6 +98,7 @@ export function ChatWindow({ scenario, onFinish, onBack }: ChatWindowProps) {
   };
 
   const next = () => {
+    if (listening) return;
     const item = scenario.scripted_conversation[line];
     if (!item) return;
     send(item.message, item.speaker);
@@ -213,19 +215,21 @@ export function ChatWindow({ scenario, onFinish, onBack }: ChatWindowProps) {
             <ScriptedModeControls
               onNext={next}
               done={scriptDone}
+              busy={listening}
               index={line}
               total={scenario.scripted_conversation.length}
             />
           ) : (
             <form
-              className="live-input"
+              className={'live-input' + (listening ? ' busy' : '')}
               onSubmit={(event) => {
                 event.preventDefault();
-                send(input);
+                if (!listening) send(input);
               }}
             >
               <select
                 value={speaker}
+                disabled={listening}
                 onChange={(event) => setSpeaker(event.target.value)}
               >
                 {scenario.participants.map((person) => (
@@ -234,14 +238,17 @@ export function ChatWindow({ scenario, onFinish, onBack }: ChatWindowProps) {
               </select>
               <input
                 value={input}
+                disabled={listening}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Write a message…"
+                placeholder={listening ? 'Waiting for the Third Voice…' : 'Write a message…'}
               />
-              <button aria-label="Send">↑</button>
+              <button type="submit" aria-label="Send" disabled={listening || !input.trim()}>
+                ↑
+              </button>
             </form>
           )}
 
-          {scriptDone && mode === 'scripted' && (
+          {scriptDone && mode === 'scripted' && !listening && (
             <button className="finish" onClick={onFinish}>
               View one-week follow-up →
             </button>

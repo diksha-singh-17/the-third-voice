@@ -18,8 +18,8 @@ export function ScenarioPicker({ scenarios, onStart, onCreate }: ScenarioPickerP
         <em>better conversations.</em>
       </h1>
       <p className="intro">
-        The Third Voice listens quietly to workplace conversations—stepping in only when a gentle
-        reframe can help.
+        The Third <span className="intro-voice">Voice</span> listens quietly to workplace
+        conversations—stepping in only when a gentle reframe can help.
       </p>
       <div className="scenario-grid">
         {scenarios.map((scenario, index) => (
