@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import type { Decision, Escalation, Message, Scenario } from '../types';
+import { createSocket } from '../socket';
 import { MessageBubble } from './MessageBubble';
 import { MediatorCard } from './MediatorCard';
 import { DebugPanel } from './DebugPanel';
@@ -28,7 +29,7 @@ export function ChatWindow({ scenario, onFinish, onBack }: ChatWindowProps) {
   const end = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    socket = io();
+    socket = createSocket();
     socket.emit(
       'join-session',
       { sessionId: session.current, scenarioId: scenario.id, scenario },
