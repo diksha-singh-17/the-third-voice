@@ -96,6 +96,14 @@ flowchart LR
 4. **Judge view** — every turn’s decision: `INTERVENED` or `SILENT`, with reasoning.
 5. **Follow-up** — simulated one-week check on the commitment (not wired to Slack/Jira).
 
+## Enhancements
+
+- Tone dots show the Third Voice's read of each human message.
+- Intervention cards show calibrated confidence; Judge view explains the basis.
+- Escalation flags create an exportable, plain-language Markdown summary.
+- Every fourth turn, the Third Voice self-checks its recent framing for potential bias.
+- Custom scenario creation supports Chrome voice dictation when available.
+
 ---
 
 ## How it works (architecture)

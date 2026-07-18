@@ -1,9 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { Decision } from '../types/index.js';
-import { buildMediatorDecisionPrompt, buildScenarioGenerationPrompt } from '../constants/prompts.js';
+import type { Decision, FairnessCheck, Tone, Confidence } from '../types/index.js';
+import { buildFairnessCheckPrompt, buildMediatorDecisionPrompt, buildScenarioGenerationPrompt } from '../constants/prompts.js';
 
 const validTypes = new Set(['fact_check', 'reframe_deadlock', 'surface_context', 'de_escalate', 'escalate_flag']);
-const silent = (reasoning: string): Decision => ({ should_intervene: false, reasoning, message: null, intervention_type: null });
+const tones = new Set<Tone>(['neutral', 'frustrated', 'anxious', 'defensive', 'warm']);
+const confidences = new Set<Confidence>(['high', 'moderate', 'worth_verifying']);
+const silent = (reasoning: string): Decision => ({ should_intervene: false, reasoning, message: null, intervention_type: null, detected_tone: 'neutral', confidence: null, confidence_reason: null });
 
 function parseScenario(text: string) {
   const value = JSON.parse(text.replace(/^```json\s*|\s*```$/g, '').trim());
@@ -39,8 +41,20 @@ export async function decide(scenario: any, history: {speaker:string;message:str
       const cleaned = raw.text.replace(/^```json\s*|\s*```$/g, '').trim();
       const parsed = JSON.parse(cleaned);
       if (typeof parsed.should_intervene !== 'boolean' || typeof parsed.reasoning !== 'string') throw new Error('Invalid decision shape');
-      return { should_intervene: parsed.should_intervene, reasoning: parsed.reasoning.slice(0, 800), message: parsed.should_intervene ? String(parsed.message || '').slice(0, 360) : null, intervention_type: validTypes.has(parsed.intervention_type) ? parsed.intervention_type : null };
+      return { should_intervene: parsed.should_intervene, reasoning: parsed.reasoning.slice(0, 800), message: parsed.should_intervene ? String(parsed.message || '').slice(0, 360) : null, intervention_type: validTypes.has(parsed.intervention_type) ? parsed.intervention_type : null, detected_tone: tones.has(parsed.detected_tone) ? parsed.detected_tone : 'neutral', confidence: parsed.should_intervene && confidences.has(parsed.confidence) ? parsed.confidence : null, confidence_reason: parsed.should_intervene && typeof parsed.confidence_reason === 'string' ? parsed.confidence_reason.slice(0, 240) : null };
     } catch (error) { if (attempt === 1) return silent(`Third Voice unavailable — ${error instanceof Error ? error.message : 'unknown error'}`); }
   }
   return silent('Third Voice unavailable.');
+}
+
+export async function checkFairness(decisions: Pick<Decision, 'message' | 'intervention_type'>[]): Promise<FairnessCheck | null> {
+  if (!process.env.ANTHROPIC_API_KEY || decisions.length < 2) return null;
+  try {
+    const interventions = decisions.map((d, index) => `${index + 1}. [${d.intervention_type}] ${d.message}`).join('\n');
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const response = await client.messages.create({ model: 'claude-sonnet-4-6', max_tokens: 220, messages: [{ role: 'user', content: buildFairnessCheckPrompt(interventions) }] });
+    const text = response.content.find((block) => block.type === 'text'); if (!text || text.type !== 'text') return null;
+    const parsed = JSON.parse(text.text.replace(/^```json\s*|\s*```$/g, '').trim());
+    return { bias_detected: Boolean(parsed.bias_detected), explanation: parsed.bias_detected && typeof parsed.explanation === 'string' ? parsed.explanation.slice(0, 400) : null };
+  } catch { return null; }
 }
