@@ -32,8 +32,8 @@ export function App() {
     async function loadAppData() {
       try {
         const [scenarioResponse, healthResponse] = await Promise.all([
-          fetch(`${API_URL}/scenarios`),
-          fetch(`${API_URL}/health`),
+          fetch(`${API_URL}/api/scenarios`),
+          fetch(`${API_URL}/api/health`),
         ]);
         const [scenarioData, healthData] = await Promise.all([
           scenarioResponse.json(),
@@ -96,7 +96,7 @@ export function App() {
   };
 
   const regenerateScenario = async (description: string) => {
-    const response = await fetch(`${API_URL}/scenarios/generate`, {
+    const response = await fetch(`${API_URL}/api/scenarios/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description }),

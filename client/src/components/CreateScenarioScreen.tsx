@@ -189,7 +189,7 @@ export function CreateScenarioScreen({ onBack, onGenerated }: CreateScenarioScre
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${API_URL}/scenarios/generate`, {
+      const response = await fetch(`${API_URL}/api/scenarios/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description }),
