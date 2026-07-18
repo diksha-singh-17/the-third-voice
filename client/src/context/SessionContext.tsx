@@ -1,0 +1,2 @@
+import { createContext, useContext, useState } from 'react'; import type { Scenario } from '../types';
+const SessionContext=createContext<{scenario:Scenario|null;setScenario:(s:Scenario|null)=>void}>({scenario:null,setScenario:()=>{}}); export const SessionProvider=({children}:{children:React.ReactNode})=>{const [scenario,setScenario]=useState<Scenario|null>(null);return <SessionContext.Provider value={{scenario,setScenario}}>{children}</SessionContext.Provider>}; export const useSession=()=>useContext(SessionContext);

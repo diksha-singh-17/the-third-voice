@@ -1,0 +1,1 @@
+import type { Message } from '../types'; export function MediatorCard({message}:{message:Message}) { return <div className="mediator-card"><div><span>✦</span> THIRD VOICE <small>INTERVENTION</small></div><p>{message.message}</p></div> }

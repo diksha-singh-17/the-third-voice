@@ -1,0 +1,2 @@
+import type { Message } from '../types';
+export function MessageBubble({message,own}:{message:Message;own:boolean}) { return <div className={'bubble-row '+(own?'own':'')}><div className="avatar">{message.speaker[0]}</div><div><span className="speaker">{message.speaker}</span><div className="bubble">{message.message}</div><time>{new Date(message.at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</time></div></div> }
