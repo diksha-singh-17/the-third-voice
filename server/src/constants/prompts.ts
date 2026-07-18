@@ -1,6 +1,6 @@
 export const SCENARIO_JSON_SHAPE = `{"scenario_title":string,"participants":[{"name":string,"role":string,"avatar_initial":string}],"background_log_entries":[{"participant":string,"date":string,"note":string,"tone":string}],"activity_signals":[{"participant":string,"signal":string}],"pre_conversation_briefing":{"participant_a_sees":string,"participant_b_sees":string},"scripted_conversation":[{"speaker":string,"message":string}],"follow_up":{"commitment":string,"success_note":string,"stalled_note":string}}`;
 
-export const DECISION_JSON_SHAPE = `{"should_intervene":boolean,"reasoning":string,"message":string|null,"intervention_type":"fact_check"|"reframe_deadlock"|"surface_context"|"de_escalate"|"escalate_flag"|null}`;
+export const DECISION_JSON_SHAPE = `{"should_intervene":boolean,"reasoning":string,"message":string|null,"intervention_type":"fact_check"|"reframe_deadlock"|"surface_context"|"de_escalate"|"escalate_flag"|null,"detected_tone":"neutral"|"frustrated"|"anxious"|"defensive"|"warm","confidence":"high"|"moderate"|"worth_verifying"|null,"confidence_reason":string|null}`;
 
 const SCENARIO_GENERATION_STRICT_SUFFIX = '\nRespond with ONLY valid JSON. This is a strict requirement.';
 
@@ -21,7 +21,7 @@ export function buildMediatorDecisionPrompt(context: string, conversation: strin
 
 ONLY interject when: a final dismissal could be reopened by concrete evidence or an alternative path; a claim contradicts background evidence; a vague non-answer repeats a documented pattern; emotion or blame needs a brief de-escalation; or disrespectful/demeaning language is directed at someone. For disrespect, use escalate_flag and calmly name the crossed line without blaming the recipient.
 
-Silence is the default. Stay silent when people are making progress or asking real questions. If you interject, use 1–2 short, neutral sentences framed as a question or concrete next step, never a verdict.
+Silence is the default. Stay silent when people are making progress or asking real questions. If you interject, use 1–2 short, neutral sentences framed as a question or concrete next step, never a verdict. For every newest human message, classify its tone as neutral, frustrated, anxious, defensive, or warm. If you interject, include calibrated confidence: high only for direct evidence, moderate for a well-supported inference, and worth_verifying when the intervention relies on incomplete context. Give a short confidence_reason for the judge log.
 
 Background context (private; do not quote unnecessarily):
 ${context}
@@ -30,4 +30,8 @@ Conversation so far:
 ${conversation}
 
 Respond ONLY valid JSON: ${DECISION_JSON_SHAPE}`;
+}
+
+export function buildFairnessCheckPrompt(interventions: string): string {
+  return `Review these recent Third Voice interventions for a recurring framing bias across multiple interventions. Do not judge a single isolated intervention. Return ONLY valid JSON: {"bias_detected":boolean,"explanation":string|null}. If there is no clear pattern, set false and explanation null.\n\nRecent interventions:\n${interventions}`;
 }
