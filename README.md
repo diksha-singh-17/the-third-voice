@@ -35,6 +35,12 @@ You need an **Anthropic API key** for the mediator and custom scenario generatio
 ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 ```
 
+### Optional Slack Events integration
+
+The Slack bridge is disabled unless both `SLACK_BOT_TOKEN` and `SLACK_SIGNING_SECRET` are set in `.env`. When enabled, Slack human messages go through the same mediator service as the in-app chat, and any intervention replies in the same channel or thread.
+
+Configure your Slack app to send Events API requests to `https://YOUR-PUBLIC-HOST/slack/events`, subscribe it to `message.channels` and/or `message.im`, and grant `chat:write`, `channels:history`, and `im:history`. Set `SLACK_SCENARIO_ID` to select the seed context used for the demo. This is deliberately a single-workspace, in-memory demo integration: thread history resets when the server restarts.
+
 | Without key | With key |
 |-------------|----------|
 | Chat still works | Claude decides after each human message |
@@ -103,6 +109,8 @@ flowchart LR
 - Escalation flags create an exportable, plain-language Markdown summary.
 - Every fourth turn, the Third Voice self-checks its recent framing for potential bias.
 - Custom scenario creation supports Chrome voice dictation when available.
+- A custom scenario that reuses a participant name now shows session-only prior-scenario context in that person's private briefing.
+- Optional Slack Events integration reuses the identical mediation decision loop for channel and DM messages.
 
 ---
 

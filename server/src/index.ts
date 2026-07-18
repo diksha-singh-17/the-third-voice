@@ -6,15 +6,18 @@ import { Server } from 'socket.io';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { checkFairness, decide, generateScenario } from './services/llmMediator.js';
+import { installSlackIntegration } from './services/slackIntegration.js';
 
 const seedDir = join(process.cwd(), 'server', 'seed-data');
 const scenarios = readdirSync(seedDir).map((file) => ({ id: file.replace('.json', ''), ...JSON.parse(readFileSync(join(seedDir, file), 'utf8')) }));
-const app = express(); app.use(cors()); app.use(express.json());
+const app = express();
+const slack = installSlackIntegration(app, scenarios);
+app.use(cors()); app.use(express.json());
 const httpServer = createServer(app); const io = new Server(httpServer, { cors: { origin: '*' } });
 type Session = { scenario:any; messages:any[]; decisions:any[]; escalation_log:any[] };
 const sessions = new Map<string, Session>();
 const makeSession = (id:string, scenarioId:string) => { const scenario = scenarios.find((s) => s.id === scenarioId); if (!scenario) return null; const session = { scenario, messages: [], decisions: [], escalation_log: [] }; sessions.set(id, session); return session; };
-app.get('/api/health', (_req,res) => res.json({ ok:true, anthropicConfigured: Boolean(process.env.ANTHROPIC_API_KEY) }));
+app.get('/api/health', (_req,res) => res.json({ ok:true, anthropicConfigured: Boolean(process.env.ANTHROPIC_API_KEY), slack }));
 app.get('/api/scenarios', (_req,res) => res.json(scenarios));
 app.post('/api/scenarios/generate', async (req, res) => {
   const description = String(req.body?.description || '').trim();
@@ -38,4 +41,7 @@ io.on('connection', (socket) => {
     io.to(sessionId).emit('mediator-status', false);
   });
 });
-httpServer.listen(3001, () => console.log('Third Voice server at http://localhost:3001'));
+httpServer.listen(3001, () => {
+  console.log('Third Voice server at http://localhost:3001');
+  if (slack.enabled) console.log(`Slack Events API enabled at ${slack.endpoint} using ${slack.scenarioId}.`);
+});

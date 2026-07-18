@@ -3,11 +3,17 @@ import type { Scenario } from '../types';
 
 type BriefingScreenProps = {
   scenario: Scenario;
+  recurringParticipants: { name: string; previousScenarios: string[] }[];
   onContinue: () => void;
   onBack: () => void;
 };
 
-export function BriefingScreen({ scenario, onContinue, onBack }: BriefingScreenProps) {
+export function BriefingScreen({
+  scenario,
+  recurringParticipants,
+  onContinue,
+  onBack,
+}: BriefingScreenProps) {
   const [judge, setJudge] = useState(false);
   const [seen, setSeen] = useState<boolean[]>([false, false]);
 
@@ -48,6 +54,10 @@ export function BriefingScreen({ scenario, onContinue, onBack }: BriefingScreenP
         <div className="brief-grid">
           {cards.map(({ person, nudge }, index) => {
             const revealed = judge || seen[index];
+            const memory = recurringParticipants.find(
+              (item) =>
+                item.name.trim().toLocaleLowerCase() === person.name.trim().toLocaleLowerCase(),
+            );
             return (
               <article
                 className={'brief-card' + (revealed ? ' revealed' : '')}
@@ -67,6 +77,15 @@ export function BriefingScreen({ scenario, onContinue, onBack }: BriefingScreenP
                       <span>✦ MEDIATOR NOTE</span>
                       <p>{nudge}</p>
                     </div>
+                    {memory && (
+                      <div className="session-memory">
+                        <span>SESSION CONTEXT</span>
+                        <p>
+                          {person.name} has appeared in an earlier scenario this session:{' '}
+                          {memory.previousScenarios.join(', ')}.
+                        </p>
+                      </div>
+                    )}
                     <details>
                       <summary>
                         Background evidence <i>⌄</i>
