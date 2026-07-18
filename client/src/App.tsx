@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from './api';
 import type { Scenario } from './types';
 import { ScenarioPicker } from './components/ScenarioPicker';
 import { BriefingScreen } from './components/BriefingScreen';
@@ -31,8 +32,8 @@ export function App() {
     async function loadAppData() {
       try {
         const [scenarioResponse, healthResponse] = await Promise.all([
-          fetch('/api/scenarios'),
-          fetch('/api/health'),
+          fetch(`${API_URL}/scenarios`),
+          fetch(`${API_URL}/health`),
         ]);
         const [scenarioData, healthData] = await Promise.all([
           scenarioResponse.json(),
@@ -95,7 +96,7 @@ export function App() {
   };
 
   const regenerateScenario = async (description: string) => {
-    const response = await fetch('/api/scenarios/generate', {
+    const response = await fetch(`${API_URL}/scenarios/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ description }),

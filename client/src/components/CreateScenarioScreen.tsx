@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { API_URL } from '../api';
 import type { Scenario } from '../types';
 
 type SpeechRecognitionLike = {
@@ -188,7 +189,7 @@ export function CreateScenarioScreen({ onBack, onGenerated }: CreateScenarioScre
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/scenarios/generate', {
+      const response = await fetch(`${API_URL}/scenarios/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description }),
