@@ -17,6 +17,9 @@ const httpServer = createServer(app); const io = new Server(httpServer, { cors: 
 type Session = { scenario:any; messages:any[]; decisions:any[]; escalation_log:any[] };
 const sessions = new Map<string, Session>();
 const makeSession = (id:string, scenarioId:string) => { const scenario = scenarios.find((s) => s.id === scenarioId); if (!scenario) return null; const session = { scenario, messages: [], decisions: [], escalation_log: [] }; sessions.set(id, session); return session; };
+app.get('/health', (_req, res) => {
+  res.status(200).send('OK');
+});
 app.get('/api/health', (_req,res) => res.json({ ok:true, anthropicConfigured: Boolean(process.env.ANTHROPIC_API_KEY), slack }));
 app.get('/api/scenarios', (_req,res) => res.json(scenarios));
 app.post('/api/scenarios/generate', async (req, res) => {
