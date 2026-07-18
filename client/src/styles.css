@@ -42,6 +42,7 @@ img,svg,video{max-width:100%;height:auto}
 .nudge{border-left:3px solid #be8950;background:#fff9ed;padding:13px 14px;margin:22px 0}
 .nudge span{font-size:10px;color:#a36e32;letter-spacing:.1em;font-weight:bold}
 .nudge p{line-height:1.55;margin:7px 0 0}
+.session-memory{border-left:3px solid #6e8cba;background:#f2f6fb;padding:12px 14px;margin:14px 0;color:#405775}.session-memory span{font-size:10px;letter-spacing:.1em;font-weight:bold}.session-memory p{line-height:1.5;margin:6px 0 0;font-size:13px}
 details{border-top:1px solid #edf0eb;padding-top:14px;color:#657069;font-size:13px}
 summary{cursor:pointer;font-weight:600;list-style:none}
 summary i{float:right}

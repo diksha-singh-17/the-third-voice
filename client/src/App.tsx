@@ -21,6 +21,7 @@ const screenTitles: Record<Screen, string> = {
 export function App() {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [scenario, setScenario] = useState<Scenario | null>(null);
+  const [scenarioHistory, setScenarioHistory] = useState<Scenario[]>([]);
   const [screen, setScreen] = useState<Screen>('pick');
   const [configured, setConfigured] = useState(true);
 
@@ -60,6 +61,33 @@ export function App() {
     setScenario(selected);
     setScreen('brief');
   };
+
+  const rememberAndStart = (selected: Scenario) => {
+    start(selected);
+    setScenarioHistory((history) => [...history, selected]);
+  };
+
+  const recurringParticipants = scenario?.id.startsWith('custom-')
+    ? scenario.participants.flatMap((participant) => {
+        const previousScenarios = scenarioHistory.filter(
+          (previous) =>
+            previous.id !== scenario.id &&
+            previous.participants.some(
+              (previousParticipant) =>
+                previousParticipant.name.trim().toLocaleLowerCase() ===
+                participant.name.trim().toLocaleLowerCase(),
+            ),
+        );
+        return previousScenarios.length
+          ? [
+              {
+                name: participant.name,
+                previousScenarios: previousScenarios.map((item) => item.scenario_title),
+              },
+            ]
+          : [];
+      })
+    : [];
 
   const reset = () => {
     setScenario(null);
@@ -110,10 +138,7 @@ export function App() {
           description={scenario.description || ''}
           onBack={() => setScreen('create')}
           onRegenerate={regenerateScenario}
-          onContinue={(approved) => {
-            setScenario(approved);
-            setScreen('brief');
-          }}
+          onContinue={rememberAndStart}
         />
       </>
     );
@@ -125,7 +150,7 @@ export function App() {
         {apiWarning}
         <ScenarioPicker
           scenarios={scenarios}
-          onStart={start}
+          onStart={rememberAndStart}
           onCreate={() => setScreen('create')}
         />
       </>
@@ -138,6 +163,7 @@ export function App() {
       {screen === 'brief' && (
         <BriefingScreen
           scenario={scenario}
+          recurringParticipants={recurringParticipants}
           onBack={reset}
           onContinue={() => setScreen('chat')}
         />
