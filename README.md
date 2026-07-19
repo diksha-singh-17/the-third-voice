@@ -6,9 +6,11 @@ Hard conversations fail when facts stay offstage, talks close too early, fear re
 
 **Demo scenarios:** Raise Conversation · Missed Deadline · Scared Intern · Create your own
 
+**▶ Live demo:** https://the-third-voice-7jqg.vercel.app
+
 ---
 
-## Quick start
+## Run it locally
 
 **Needs:** Node.js 20+, an [Anthropic API key](https://console.anthropic.com/)
 
@@ -65,6 +67,13 @@ sequenceDiagram
 ```
 
 Chat runs over **Socket.io** (not a REST chat endpoint). Only the server talks to Anthropic.
+
+---
+
+## Deployment
+
+- **Frontend:** [Vercel](https://the-third-voice-7jqg.vercel.app) — set `VITE_API_URL` to the backend origin
+- **Backend:** [Render](https://the-third-voice-backend.onrender.com/health) — set `ANTHROPIC_API_KEY`; `PORT` is provided automatically (the root path has no route; use `/health` to check it's up)
 
 ---
 
