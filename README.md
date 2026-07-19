@@ -1,5 +1,5 @@
 # The Third Voice
-
+<img width="1421" height="795" alt="Screenshot 2026-07-19 at 11 02 41 PM" src="https://github.com/user-attachments/assets/a939ddfb-7142-4c2d-be75-c345e660b6dc" />
 A low-key AI that watches workplace 1:1s and speaks only when a short, neutral reframe helps. **Silence is the default.**
 
 Hard conversations fail when facts stay offstage, talks close too early, fear replaces curiosity, or commitments evaporate. Most AI tools add more chat. This one intervenes rarely — as a question or next step, never a verdict.
